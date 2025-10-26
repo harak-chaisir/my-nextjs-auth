@@ -8,11 +8,11 @@ interface AdminLayoutProps {
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   // Require admin role - automatically redirects if not admin
-  const { session, rbac } = await requireAdmin('/admin');
+  const { user } = await requireAdmin('/dashboard');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar user={session.user} />
+      <Sidebar user={user} />
       <div className="lg:pl-64 transition-all duration-300">
         <main className="min-h-screen pt-16 lg:pt-0">
           {children}
