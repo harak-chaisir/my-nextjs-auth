@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { User } from '@/types/admin';
 import { getRoleBadgeStyle, getStatusBadgeStyle, formatDate } from '@/lib/utils/admin-utils';
