@@ -1,6 +1,6 @@
 import { auth0 } from '@/lib/auth/auth0';
 import { redirect } from 'next/navigation';
-import { UserRole, AuthResult } from '@/types/rbac';
+import { UserRole, AuthResult, Auth0Session, Auth0User } from '@/types/rbac';
 import { createRBACContext, canAccessRoute, getDefaultRedirect, extractUserRoles } from '@/lib/rbac';
 import { logger } from '@/lib/utils/logger';
 
@@ -52,8 +52,8 @@ export async function requireAuth(options?: RequireAuthOptions): Promise<AuthRes
     logger.auth.success(session.user.email, userRoles, duration);
 
     return {
-      session: session as any,
-      user: session.user as any,
+      session: session as unknown as Auth0Session,
+      user: session.user as unknown as Auth0User,
       rbac: createRBACContext(session.user, session)
     };
   } catch (error) {

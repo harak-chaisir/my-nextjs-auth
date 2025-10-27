@@ -1,14 +1,106 @@
-import { auth0 } from "@/lib/auth/auth0";
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function ProfilePage() {
-  const session = await auth0.getSession();
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-  if (!session) {
-    redirect('/');
+interface UserProfile {
+  name?: string;
+  nickname?: string;
+  email?: string;
+  picture?: string;
+  email_verified?: boolean;
+  sub?: string;
+}
+
+export default function ProfilePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    nickname: '',
+  });
+
+  useEffect(() => {
+    // Fetch user profile from API
+    // For now, using mock data - replace with actual API call
+    const fetchProfile = async () => {
+      try {
+        // TODO: Replace with actual API call
+        // const response = await fetch('/api/user/profile');
+        // const data = await response.json();
+        
+        // Mock data for demonstration
+        const mockUser: UserProfile = {
+          name: 'Admin User',
+          nickname: 'admin',
+          email: 'admin@example.com',
+          picture: 'https://i.pravatar.cc/150?img=1',
+          email_verified: true,
+          sub: 'auth0|123456789',
+        };
+        
+        setUser(mockUser);
+        setFormData({
+          name: mockUser.name || '',
+          nickname: mockUser.nickname || '',
+        });
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      // TODO: Implement API call to save changes
+      console.log('Saving changes:', formData);
+      alert('Changes saved successfully!');
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+      alert('Failed to save changes');
+    }
+  };
+
+  const handleChangePicture = () => {
+    // TODO: Implement image upload functionality
+    alert('Change Picture functionality - TODO: Implement image upload');
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        nickname: user.nickname || '',
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-gray-600 dark:text-gray-400">Loading profile...</div>
+      </div>
+    );
   }
 
-  const user = session.user;
+  if (!user) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-red-600 dark:text-red-400">Failed to load profile</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -26,10 +118,12 @@ export default async function ProfilePage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="text-center">
               {user.picture && (
-                <img 
+                <Image
                   src={user.picture} 
                   alt={user.name || 'User'} 
-                  className="w-24 h-24 rounded-full mx-auto mb-4"
+                  width={96}
+                  height={96}
+                  className="rounded-full mx-auto mb-4"
                 />
               )}
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -57,7 +151,10 @@ export default async function ProfilePage() {
                 </div>
               </div>
 
-              <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+              <button 
+                onClick={handleChangePicture}
+                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200"
+              >
                 Change Picture
               </button>
             </div>
@@ -79,7 +176,9 @@ export default async function ProfilePage() {
                   </label>
                   <input
                     type="text"
-                    value={user.name || ''}
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     placeholder="Enter your full name"
                   />
@@ -91,7 +190,9 @@ export default async function ProfilePage() {
                   </label>
                   <input
                     type="text"
-                    value={user.nickname || ''}
+                    name="nickname"
+                    value={formData.nickname}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     placeholder="Enter your nickname"
                   />
@@ -126,10 +227,16 @@ export default async function ProfilePage() {
               </div>
 
               <div className="flex justify-end space-x-4 pt-6 border-t dark:border-gray-700">
-                <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200">
+                <button 
+                  onClick={handleCancel}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200"
+                >
                   Cancel
                 </button>
-                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
+                <button 
+                  onClick={handleSaveChanges}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200"
+                >
                   Save Changes
                 </button>
               </div>
@@ -150,7 +257,10 @@ export default async function ProfilePage() {
               <h5 className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">Add an extra layer of security to your account</p>
             </div>
-            <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200">
+            <button 
+              onClick={() => alert('Enable 2FA - TODO: Implement 2FA setup')}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
+            >
               Enable
             </button>
           </div>
@@ -160,7 +270,10 @@ export default async function ProfilePage() {
               <h5 className="font-medium text-gray-900 dark:text-white">Password</h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">Change your account password</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
+            <button 
+              onClick={() => alert('Change Password - TODO: Implement password change')}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200"
+            >
               Change
             </button>
           </div>
@@ -170,7 +283,10 @@ export default async function ProfilePage() {
               <h5 className="font-medium text-gray-900 dark:text-white">Login History</h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">View your recent login activity</p>
             </div>
-            <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200">
+            <button 
+              onClick={() => router.push('/admin/profile/login-history')}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200"
+            >
               View
             </button>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { RBACContext } from '@/types/rbac';
+import { RBACContext, UserRole } from '@/types/rbac';
 
 /**
  * React Context for RBAC
@@ -42,8 +42,8 @@ export function useRBAC(): RBACContext {
  */
 interface WithRoleProps {
   children: ReactNode;
-  role?: string;
-  roles?: string[];
+  role?: UserRole;
+  roles?: UserRole[];
   fallback?: ReactNode;
 }
 
@@ -56,11 +56,11 @@ export function WithRole({
   const rbac = useRBAC();
   
   // Check role access
-  if (role && !rbac.hasRole(role as any)) {
+  if (role && !rbac.hasRole(role)) {
     return <>{fallback}</>;
   }
   
-  if (roles && !rbac.hasAnyRole(roles as any[])) {
+  if (roles && !rbac.hasAnyRole(roles)) {
     return <>{fallback}</>;
   }
   
@@ -72,7 +72,7 @@ export function WithRole({
  */
 export function AdminOnly({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
   return (
-    <WithRole role="Admin" fallback={fallback}>
+    <WithRole role={UserRole.ADMIN} fallback={fallback}>
       {children}
     </WithRole>
   );
@@ -83,7 +83,7 @@ export function AdminOnly({ children, fallback = null }: { children: ReactNode; 
  */
 export function AuthenticatedOnly({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
   return (
-    <WithRole roles={['Admin', 'Moderator', 'User']} fallback={fallback}>
+    <WithRole roles={[UserRole.ADMIN, UserRole.MODERATOR, UserRole.USER]} fallback={fallback}>
       {children}
     </WithRole>
   );

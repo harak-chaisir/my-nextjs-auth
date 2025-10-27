@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { RBACContext } from '@/types/rbac';
+import { RBACContext, UserRole } from '@/types/rbac';
 
 interface UserSidebarProps {
-  user: any;
+  user: {
+    name?: string;
+    email?: string;
+    picture?: string;
+  };
   rbac: RBACContext;
 }
 
@@ -14,7 +19,7 @@ interface MenuItem {
   name: string;
   href: string;
   icon: string;
-  requiredRole?: string;
+  requiredRole?: UserRole;
 }
 
 export default function UserSidebar({ user, rbac }: UserSidebarProps) {
@@ -26,7 +31,7 @@ export default function UserSidebar({ user, rbac }: UserSidebarProps) {
   const menuItems: MenuItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: '📊' },
     { name: 'Profile', href: '/dashboard/profile', icon: '👤' },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: '📈', requiredRole: 'Moderator' },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: '📈', requiredRole: UserRole.MODERATOR },
     { name: 'Messages', href: '/dashboard/messages', icon: '💬' },
     { name: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
     { name: 'Support', href: '/dashboard/support', icon: '🆘' },
@@ -35,11 +40,11 @@ export default function UserSidebar({ user, rbac }: UserSidebarProps) {
   // Filter menu items based on roles
   const accessibleMenuItems = menuItems.filter(item => {
     if (!item.requiredRole) return true;
-    return rbac.hasRole(item.requiredRole as any) || rbac.hasRole('Admin' as any);
+    return rbac.hasRole(item.requiredRole) || rbac.hasRole(UserRole.ADMIN);
   });
 
   // Show admin panel link if user is admin
-  const showAdminPanel = rbac.hasRole('Admin' as any);
+  const showAdminPanel = rbac.hasRole(UserRole.ADMIN);
 
   useEffect(() => {
     const handleResize = () => {
@@ -66,10 +71,12 @@ export default function UserSidebar({ user, rbac }: UserSidebarProps) {
       <div className="lg:hidden">
         <div className="flex items-center justify-between bg-white dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-            <img
-              className="w-8 h-8 rounded-full"
+            <Image
+              className="rounded-full"
               src={user?.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`}
               alt={user?.name || 'User'}
+              width={32}
+              height={32}
             />
             <span className="font-medium text-gray-900 dark:text-white">{user?.name}</span>
           </div>
@@ -120,10 +127,12 @@ export default function UserSidebar({ user, rbac }: UserSidebarProps) {
         {/* User Info */}
         <div className={`p-4 border-b border-gray-200 dark:border-gray-700 ${isCollapsed ? 'lg:hidden' : ''}`}>
           <div className="flex items-center space-x-3">
-            <img
-              className="w-10 h-10 rounded-full"
+            <Image
+              className="rounded-full"
               src={user?.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`}
               alt={user?.name || 'User'}
+              width={40}
+              height={40}
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">

@@ -111,13 +111,19 @@ const tokenCache = new TokenCache();
 /**
  * Extract ID token from session (handles multiple possible structures)
  */
-export function extractIdToken(session: Auth0Session | any): string | null {
+export function extractIdToken(session: Auth0Session | Record<string, unknown> | null | undefined): string | null {
+  if (!session) return null;
+
+  const sessionObj = session as Record<string, unknown>;
+  const tokenSetObj = sessionObj.tokenSet as Record<string, unknown> | undefined;
+  const tokensObj = sessionObj.tokens as Record<string, unknown> | undefined;
+
   const possibleLocations = [
-    session?.tokenSet?.idToken,
-    session?.idToken,
-    session?.id_token,
-    session?.tokens?.idToken,
-    session?.tokens?.id_token,
+    tokenSetObj?.idToken,
+    sessionObj.idToken,
+    sessionObj.id_token,
+    tokensObj?.idToken,
+    tokensObj?.id_token,
   ];
 
   for (const token of possibleLocations) {
@@ -161,7 +167,7 @@ export function decodeJWT(token: string): JWTPayload {
  * Extract roles from JWT payload with caching
  */
 export function extractRolesFromToken(
-  session: Auth0Session | any,
+  session: Auth0Session | Record<string, unknown> | null | undefined,
   namespace: string = env.rbac.customClaimsNamespace
 ): UserRole[] | null {
   try {

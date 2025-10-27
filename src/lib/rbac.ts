@@ -176,21 +176,24 @@ function isAdminEmail(email?: string): boolean {
 }
 
 /**
- * Extract user roles with simplified strategies
+ * Extract user roles from Auth0 user object
  * @throws Never throws - always returns at least the default role
  */
-export function extractUserRoles(user: Auth0User | any): UserRole[] {
+export function extractUserRoles(user: Auth0User | Record<string, unknown>): UserRole[] {
   if (!user) {
     logger.warn('extractUserRoles: null/undefined user');
     return [RBAC_CONFIG.defaultRole];
   }
 
+  // Cast for dynamic property access
+  const userObj = user as Record<string, unknown>;
+
   // Try extraction strategies in order
   const strategies = [
-    () => safeExtractRoles(user[env.rbac.customClaimsNamespace]),
-    () => safeExtractRoles(user.roles),
-    () => safeExtractRoles(user.app_metadata?.roles),
-    () => isAdminEmail(user.email) ? [UserRole.ADMIN] : []
+    () => safeExtractRoles(userObj[env.rbac.customClaimsNamespace] as unknown),
+    () => safeExtractRoles(userObj.roles as unknown),
+    () => safeExtractRoles((userObj.app_metadata as Record<string, unknown>)?.roles as unknown),
+    () => isAdminEmail(userObj.email as string | undefined) ? [UserRole.ADMIN] : []
   ];
   
   for (const strategy of strategies) {
@@ -217,7 +220,7 @@ export function extractUserRoles(user: Auth0User | any): UserRole[] {
  * Create RBAC context for a user
  * @throws Never throws - always returns a valid context
  */
-export function createRBACContext(user: Auth0User | any, session?: Auth0Session | any): RBACContext {
+export function createRBACContext(user: Auth0User | Record<string, unknown>, session?: Auth0Session | Record<string, unknown>): RBACContext {
   const startTime = Date.now();
   
   try {
@@ -244,15 +247,17 @@ export function createRBACContext(user: Auth0User | any, session?: Auth0Session 
     }
     
     logger.performance.measure('createRBACContext', Date.now() - startTime, {
-      userId: user.sub || user.id,
+      userId: (user as Record<string, unknown>).sub || (user as Record<string, unknown>).id,
       rolesCount: roles.length
     });
+
+    const userObj = user as Record<string, unknown>;
     
     return {
       user: {
-        id: user.sub || user.id,
-        email: user.email,
-        name: user.name,
+        id: (userObj.sub as string) || (userObj.id as string),
+        email: userObj.email as string,
+        name: userObj.name as string,
         roles
       },
       hasRole: (role: UserRole) => hasRole(roles, role),
@@ -265,11 +270,13 @@ export function createRBACContext(user: Auth0User | any, session?: Auth0Session 
     logger.error('Critical error creating RBAC context, using defaults', error);
     
     const defaultRoles = [RBAC_CONFIG.defaultRole];
+    const userObj = user as Record<string, unknown> | null | undefined;
+    
     return {
       user: {
-        id: user?.sub || user?.id || 'unknown',
-        email: user?.email || 'unknown',
-        name: user?.name || 'unknown',
+        id: ((userObj?.sub || userObj?.id) as string) || 'unknown',
+        email: (userObj?.email as string) || 'unknown',
+        name: (userObj?.name as string) || 'unknown',
         roles: defaultRoles
       },
       hasRole: (role: UserRole) => role === RBAC_CONFIG.defaultRole,

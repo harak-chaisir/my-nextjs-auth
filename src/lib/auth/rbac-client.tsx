@@ -36,7 +36,7 @@ export function useRBAC() {
 /**
  * Extract user roles on client side
  */
-function extractClientUserRoles(user: any): UserRole[] {
+function extractClientUserRoles(user: Record<string, unknown> | null | undefined): UserRole[] {
   const rolesFromClaims = user?.[CUSTOM_CLAIMS_NAMESPACE];
   if (rolesFromClaims && Array.isArray(rolesFromClaims)) {
     return rolesFromClaims as UserRole[];

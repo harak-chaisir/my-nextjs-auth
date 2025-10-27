@@ -1,5 +1,6 @@
 import { getAuthContext } from '@/lib/auth/rbac-server';
 import { UserRole } from '@/types/rbac';
+import Image from 'next/image';
 
 export default async function Dashboard() {
   // Get auth context with RBAC
@@ -116,10 +117,12 @@ export default async function Dashboard() {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 {user.picture && (
-                  <img 
+                  <Image
                     src={user.picture} 
                     alt={user.name || 'User'} 
-                    className="w-16 h-16 rounded-full"
+                    width={64}
+                    height={64}
+                    className="rounded-full"
                   />
                 )}
                 <div>

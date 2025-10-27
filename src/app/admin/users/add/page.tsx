@@ -87,6 +87,7 @@ export default function AddUserPage() {
       alert('User created successfully!');
       router.push('/admin');
     } catch (error) {
+      console.error('Error creating user:', error);
       alert('Error creating user. Please try again.');
     } finally {
       setIsSubmitting(false);

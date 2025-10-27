@@ -1,5 +1,6 @@
 import { auth0 } from "@/lib/auth/auth0";
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
 
 export default async function ProfilePage() {
   const session = await auth0.getSession();
@@ -26,10 +27,12 @@ export default async function ProfilePage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="text-center">
               {user.picture && (
-                <img 
+                <Image
                   src={user.picture} 
                   alt={user.name || 'User'} 
-                  className="w-24 h-24 rounded-full mx-auto mb-4"
+                  width={96}
+                  height={96}
+                  className="rounded-full mx-auto mb-4"
                 />
               )}
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">

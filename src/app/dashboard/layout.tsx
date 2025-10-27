@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
   // Require authentication for users, moderators, or admins
-  const { session, rbac } = await requireAuth({
+  const { session } = await requireAuth({
     roles: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
     redirectTo: '/'
   });

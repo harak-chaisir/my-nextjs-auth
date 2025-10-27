@@ -1,10 +1,14 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from 'next/server';
 import { auth0 } from "./lib/auth/auth0";
 
 const ROLES_NAMESPACE = 'https://my-app.example.com/roles';
 
-export async function middleware(request: NextRequest) {
-  const session = await auth0.getSession(request);
+/**
+ * Proxy function for Next.js 16
+ * This is the new middleware system in Next.js 16
+ */
+export async function proxy(request: NextRequest) {
+   const session = await auth0.getSession();
 
   if (!session) {
     return auth0.middleware(request);
@@ -24,6 +28,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg).*)",
   ],
 };

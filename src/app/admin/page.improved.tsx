@@ -310,7 +310,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
 
 export default async function AdminDashboard() {
   // ✅ IMPROVEMENT: Added RBAC protection
-  const { user, rbac } = await requireAdmin();
+  const { user } = await requireAdmin();
   
   // ✅ IMPROVEMENT: Computed values extracted to functions
   const activeUsersCount = getActiveUsersCount(mockUsers);
